@@ -1,0 +1,202 @@
+ body { 
+        font-family: Arial, sans-serif; 
+        background-color: #f4f4f4; 
+    } 
+ 
+    .login-container { 
+        width: 300px; 
+        margin: 100px auto; 
+        background: #fff; 
+        padding: 20px; 
+        border-radius: 5px; 
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); 
+    } 
+ 
+    h2 { 
+        text-align: center; 
+    } 
+ 
+    label { 
+        display: block; 
+        margin-bottom: 8px; 
+    } 
+ 
+    input { 
+        width: 100%; 
+        padding: 10px; 
+        margin-bottom: 10px; 
+        border: 1px solid #ddd; 
+        border-radius: 3px; 
+    } 
+ 
+    button { 
+        width: 100%; 
+        padding: 10px; 
+        background-color: #5cb85c; 
+        border: none; 
+        color: white; 
+        border-radius: 3px; 
+        cursor: pointer; 
+    } 
+ 
+    button:hover { 
+        background-color: #4cae4c; 
+    }
+
+    /* Make video cover the entire background */
+    #bgVideo {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -1; /* Send video behind content */
+    object-fit: cover; /* Cover the whole screen without distortion */
+    }
+
+
+
+
+  /* Reset */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+/* Background Video */
+#bgVideo{
+    position:fixed;
+    right:0;
+    bottom:0;
+    min-width:100%;
+    min-height:100%;
+    object-fit:cover;
+    z-index:-2;
+}
+
+/* Character Video */
+#characterVideo{
+    position:absolute;
+    bottom:0;
+    left:50%;
+    transform:translateX(-50%);
+    height:400px;
+    z-index:1;
+}
+
+/* Header */
+.top-header{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 40px;
+    z-index:10;
+}
+
+/* Left Buttons */
+.left-buttons{
+    display:flex;
+    gap:10px;
+}
+
+.header-btn{
+    background:rgba(35, 201, 35, 0.6);
+    color:white;
+    border:none;
+    padding:10px 20px;
+    font-size:20px;
+    cursor:pointer;
+    border-radius:6px;
+    transition:0.3s;
+    width:120px; 
+    font-weight:bold;
+
+}
+
+.header-btn:hover{
+    background:#333;
+}
+
+/* Right Info Section */
+.right-info{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+/* User + Banana Boxes */
+.info-box{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(0,0,0,0.6);
+    padding:8px 14px;
+    border-radius:8px;
+    color:white;
+    font-weight:bold;
+}
+
+/* Icons */
+.icon{
+    width:28px;
+    height:28px;
+}
+
+
+/* Center Container */
+.game-container{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:800px;
+    height:450px;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 10px 30px rgba(0,0,0,0.6);
+}
+
+/* Video inside container */
+.game-video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+/* Start Game Button */
+.start-btn{
+    position: absolute;
+    top: 50%;            /* vertically center */
+    left: 40%;           /* horizontally center */
+    transform: translate(-50%, -50%); /* adjust for button's own width/height */
+    padding: 5px 10px;
+    font-size: 35px;
+    font-weight: 700;
+    background: rgb(255, 230, 0);
+    color: rgb(12, 11, 11);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;       /* optional, for centering text/icon inside button */
+    justify-content: center;
+    align-items: center;
+    height: 80px;
+    width: 350px;
+    border-style: solid;    /* Add this */
+    border-width: 5px;     /* Thickness */
+    border-color: black;    /* Color */
+    border-radius: 8px;
+    
+}
+
+.start-btn:hover{
+    background:#9cb42f;
+}
