@@ -1,0 +1,30 @@
+header-
+login
+sign up 
+monkey imoji user name 
+banana amount
+
+create a jungle with 10 banana trees 
+levels
+1-3
+5 lives 
+2 minitues 
+1 banana per correct answerr
+
+4-7 
+3 lives 
+1 minitue 
+2 banana reward 
+
+8 -10 
+
+1 life 
+30 seconds
+3 banana reward
+//headder of the website 
+//when click login navigate the another page 
+//when click state game navigate to the jungle theme game page 
+
+
+
+
