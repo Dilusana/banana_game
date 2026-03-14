@@ -43,7 +43,7 @@
         background-color: #4cae4c; 
     }
 
-    /* Make video cover the entire background */
+
     #bgVideo {
     position: fixed;
     right: 0;
@@ -52,14 +52,13 @@
     min-height: 100%;
     width: auto;
     height: auto;
-    z-index: -1; /* Send video behind content */
-    object-fit: cover; /* Cover the whole screen without distortion */
+    z-index: -1; 
+    object-fit: cover; 
     }
 
 
 
 
-  /* Reset */
 *{
     margin:0;
     padding:0;
@@ -77,17 +76,7 @@
     z-index:-2;
 }
 
-/* Character Video */
-#characterVideo{
-    position:absolute;
-    bottom:0;
-    left:50%;
-    transform:translateX(-50%);
-    height:400px;
-    z-index:1;
-}
 
-/* Header */
 .top-header{
     position:fixed;
     top:0;
@@ -100,38 +89,43 @@
     z-index:10;
 }
 
-/* Left Buttons */
+
 .left-buttons{
     display:flex;
     gap:10px;
 }
 
 .header-btn{
-    background:rgba(35, 201, 35, 0.6);
-    color:white;
-    border:none;
-    padding:10px 20px;
-    font-size:20px;
-    cursor:pointer;
-    border-radius:6px;
-    transition:0.3s;
-    width:120px; 
-    font-weight:bold;
+    width: 140px;        
+    height: 45px;        
 
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+
+    border-radius: 8px;
+    border: 2px solid #f1c40f;
+    background: #333;
+    color: white;
+    font-weight: bold;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .header-btn:hover{
-    background:#333;
+    background:#16a52e;
 }
 
-/* Right Info Section */
+
 .right-info{
     display:flex;
     align-items:center;
     gap:20px;
 }
 
-/* User + Banana Boxes */
+
 .info-box{
     display:flex;
     align-items:center;
@@ -143,14 +137,14 @@
     font-weight:bold;
 }
 
-/* Icons */
+
 .icon{
     width:28px;
     height:28px;
 }
 
 
-/* Center Container */
+
 .game-container{
     position:absolute;
     top:50%;
@@ -163,19 +157,19 @@
     box-shadow:0 10px 30px rgba(0,0,0,0.6);
 }
 
-/* Video inside container */
+
 .game-video{
     width:100%;
     height:100%;
     object-fit:cover;
 }
 
-/* Start Game Button */
+
 .start-btn{
     position: absolute;
-    top: 50%;            /* vertically center */
-    left: 40%;           /* horizontally center */
-    transform: translate(-50%, -50%); /* adjust for button's own width/height */
+    top: 50%;           
+    left: 40%;          
+    transform: translate(-50%, -50%); 
     padding: 5px 10px;
     font-size: 35px;
     font-weight: 700;
@@ -185,14 +179,14 @@
     border-radius: 8px;
     cursor: pointer;
     transition: 0.3s;
-    display: flex;       /* optional, for centering text/icon inside button */
+    display: flex;      
     justify-content: center;
     align-items: center;
     height: 80px;
     width: 350px;
-    border-style: solid;    /* Add this */
-    border-width: 5px;     /* Thickness */
-    border-color: black;    /* Color */
+    border-style: solid;  
+    border-width: 5px;     
+    border-color: black;    
     border-radius: 8px;
     
 }
