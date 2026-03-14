@@ -25,6 +25,8 @@ levels
 //when click login navigate the another page 
 //when click state game navigate to the jungle theme game page 
 
-
+11th of march 2026 
+after the start game - level 1 -- login -- api ---and playing the game 
+and indentify what else needs to be 
 
 
