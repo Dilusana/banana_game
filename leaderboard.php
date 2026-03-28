@@ -1,6 +1,6 @@
 <?php
 // 1. Database Connection (using port 3307 as required)
-$conn = new mysqli("localhost", "root", "", "banana_game", 3307);
+$conn = new mysqli("localhost", "root", "", "banana_game");
 
 // 2. Connection Check
 if ($conn->connect_error) {

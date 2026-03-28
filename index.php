@@ -9,7 +9,7 @@ $current_bananas = 0;
 // 2. Fetch real data from database only if logged in
 if ($is_logged_in) {
     // Connect using Port 3307
-    $conn = new mysqli("localhost", "root", "", "banana_game", 3307);
+    $conn = new mysqli("localhost", "root", "", "banana_game");
     
     // Check connection
     if ($conn->connect_error) {

@@ -10,8 +10,7 @@
         $password = isset($_POST['password']) ? $_POST['password'] : ""; 
 
         // 2. Database Connection (Using Port 3307)
-        $conn = new mysqli("localhost", "root", "", "banana_game", 3307);
-
+        $conn = new mysqli("localhost", "root", "", "banana_game");
         if ($conn->connect_error) {
             die("Connection failed: " . $conn->connect_error);
         }
