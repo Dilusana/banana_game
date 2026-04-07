@@ -43,7 +43,92 @@ $conn = new mysqli("localhost", "root", "", "banana_game");
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Banana Jungle Game</title>
+    <!-- Google Fonts Embed Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+    
 
+<audio id="bgMusic" loop autoplay>
+    <source src="assests/game_map.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+    (function() {
+        const audio = document.getElementById('bgMusic');
+        
+        // Set volume
+        audio.volume = 0.3;
+        
+        // Try to play immediately
+        const playAudio = () => {
+            audio.play().then(() => {
+                console.log('🎵 Music playing successfully!');
+            }).catch(error => {
+                console.log('Autoplay blocked:', error);
+                // Create a big play button as last resort
+                createPlayButton();
+            });
+        };
+        
+        // Create floating play button if autoplay fails
+        function createPlayButton() {
+            const btn = document.createElement('div');
+            btn.innerHTML = '🎵 Click to Enable Music 🎵';
+            btn.style.cssText = `
+                position: fixed;
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0,0,0,0.9);
+                color: #ffd700;
+                padding: 12px 25px;
+                border-radius: 50px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                z-index: 10000;
+                font-family: Arial;
+                border: 2px solid #ffd700;
+                box-shadow: 0 0 20px rgba(0,0,0,0.5);
+                animation: pulse 1s infinite;
+            `;
+            
+            // Add animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes pulse {
+                    0% { transform: translateX(-50%) scale(1); }
+                    50% { transform: translateX(-50%) scale(1.05); }
+                    100% { transform: translateX(-50%) scale(1); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            btn.onclick = () => {
+                audio.play();
+                btn.remove();
+            };
+            
+            document.body.appendChild(btn);
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                if (btn.parentNode) btn.style.opacity = '0.5';
+            }, 10000);
+        }
+        
+        // Try to play when page loads
+        window.addEventListener('load', playAudio);
+        
+        // Also try on any user interaction (for mobile)
+        document.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+            }
+        }, { once: true });
+    })();
+</script>
     <style>
         body {
             margin: 0;
@@ -57,34 +142,109 @@ $conn = new mysqli("localhost", "root", "", "banana_game");
             position: relative;
             width: 100%;
             height: 100vh;
+            overflow: hidden;
         }
 
-        video {
+        /* Background image that repeats horizontally for infinite scrolling */
+        .game-background {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            background-image: url('assests/mapback.jpg');
+            background-size: auto 100%;
+            background-repeat: repeat-x;
+            background-position: 0 0;
+            background-color: #000;
             z-index: 1;
         }
 
         #user-info {
             position: absolute;
-            top: 20px;
+            top: -40px;
             left: 20px;
             z-index: 20;
-            background: rgba(0, 0, 0, 0.85);
-            padding: 18px;
-            border-radius: 12px;
-            color: white;
-            border: 2px solid gold;
-            min-width: 220px;
+            padding: 0px;
+            min-width: 250px;
         }
 
         #score-display {
-            color: gold;
+            position: absolute;
+            top: 10px;
+            left: 320px;
+            z-index: 20;
+            padding: 0px;
+            min-width: 250px;
+            color: #282501;
             font-weight: bold;
             font-size: 24px;
             margin-top: 5px;
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+            font-family: 'Bungee', sans-serif; 
+            font-weight: 400; 
+            font-style: normal;
+            font-size: 25px;
+        }
+
+        #current-level-display {
+            position: absolute;
+            top: 10px;
+            left: 600px;
+            z-index: 20;
+            padding: 0px;
+            min-width: 200px;
+            color: #ff6b35;
+            font-weight: bold;
+            font-size: 24px;
+            margin-top: 5px;
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+            font-family: 'Bungee', sans-serif; 
+            font-weight: 400; 
+            font-style: normal;
+            font-size: 25px;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 2px solid gold;
+        }
+
+        #hearts-display {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            z-index: 20;
+            display: flex;
+            gap: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 2px solid gold;
+            font-family: 'Bungee', sans-serif;
+        }
+
+        .heart {
+            font-size: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .heart-lost {
+            opacity: 0.3;
+            filter: grayscale(100%);
+        }
+
+        .heart-loss {
+            animation: heartBreak 0.5s ease;
+        }
+
+        @keyframes heartBreak {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.5; color: #ff0000; }
+            100% { transform: scale(0); opacity: 0; }
         }
 
         .logout-btn {
@@ -119,32 +279,38 @@ $conn = new mysqli("localhost", "root", "", "banana_game");
             background: #2980b9;
         }
 
+        /* Levels container that scrolls with background */
+        .levels-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            overflow: visible;
+        }
+
+        /* Level button styles */
         .level-btn {
             position: absolute;
-            width: 65px;
-            height: 65px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
-            border: 4px solid gold;
-            background: #444;
+            border: 3px solid gold;
+            background: #27ae60;
             color: white;
-            font-size: 25px;
+            font-size: 20px;
             font-weight: bold;
             cursor: pointer;
-            z-index: 10;
             transition: 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
+            pointer-events: auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
 
-        /* Style for unlocked levels */
-        .level-btn.unlocked {
-            background: #27ae60;
-            border-color: #f1c40f;
-            box-shadow: 0 0 15px rgba(39, 174, 96, 0.5);
-        }
-
-        /* Style for completed levels */
         .level-btn.completed {
             background: #95a5a6;
             border-color: #7f8c8d;
@@ -152,238 +318,29 @@ $conn = new mysqli("localhost", "root", "", "banana_game");
             opacity: 0.6;
         }
 
-        /* Style for current level */
         .level-btn.current {
             background: #e67e22;
             border-color: #f39c12;
             animation: pulse 1s infinite;
         }
 
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.1);
-            }
-
-            100% {
-                transform: scale(1);
-            }
+        .level-btn.locked {
+            background: #444;
+            border-color: #666;
+            cursor: not-allowed;
+            opacity: 0.5;
         }
 
-        .level-btn:hover:not(.completed) {
-            transform: scale(1.2);
+        .level-btn:hover:not(.completed):not(.locked) {
+            transform: scale(1.1);
             background: gold;
             color: black;
         }
 
-        .level-btn.completed:hover {
-            transform: scale(1);
-            background: #95a5a6;
-            cursor: default;
-        }
-
-        /* Level button positions - adjusted to be next to the buttons */
-        .lvl-1 {
-            top: 70%;
-            left: 13%;
-        }
-
-        .lvl-2 {
-            top: 60%;
-            left: 13%;
-        }
-
-        .lvl-3 {
-            top: 50%;
-            left: 13%;
-        }
-
-        .lvl-4 {
-            top: 40%;
-            left: 13%;
-        }
-
-        .lvl-5 {
-            top: 30%;
-            left: 13%;
-        }
-
-        .lvl-6 {
-            top: 20%;
-            left: 15%;
-        }
-
-        .lvl-7 {
-            top: 18%;
-            left: 20%;
-        }
-
-        .lvl-8 {
-            top: 18%;
-            left: 25%;
-        }
-
-        .lvl-9 {
-            top: 18%;
-            left: 30%;
-        }
-
-        .lvl-10 {
-            top: 18%;
-            left: 35%;
-        }
-
-        .lvl-11 {
-            top: 18%;
-            left: 40%;
-        }
-
-        .lvl-12 {
-            top: 18%;
-            left: 45%;
-        }
-
-        .lvl-13 {
-            top: 18%;
-            left: 50%;
-        }
-
-        .lvl-14 {
-            top: 18%;
-            left: 55%;
-        }
-
-        .lvl-15 {
-            top: 18%;
-            left: 60%;
-        }
-
-        .lvl-16 {
-            top: 18%;
-            left: 65%;
-        }
-
-        .lvl-17 {
-            top: 18%;
-            left: 70%;
-        }
-
-        .lvl-18 {
-            top: 18%;
-            left: 75%;
-        }
-
-        .lvl-19 {
-            top: 22%;
-            left: 80%;
-        }
-
-        .lvl-20 {
-            top: 32%;
-            left: 83%;
-        }
-
-        .lvl-21 {
-            top: 42%;
-            left: 83%;
-        }
-
-        .lvl-22 {
-            top: 52%;
-            left: 83%;
-        }
-
-        .lvl-23 {
-            top: 62%;
-            left: 83%;
-        }
-
-        .lvl-24 {
-            top: 72%;
-            left: 82%;
-        }
-
-        .lvl-25 {
-            top: 80%;
-            left: 78%;
-        }
-
-        .lvl-26 {
-            top: 81%;
-            left: 73%;
-        }
-
-        .lvl-27 {
-            top: 81%;
-            left: 68%;
-        }
-
-        .lvl-28 {
-            top: 81%;
-            left: 63%;
-        }
-
-        .lvl-29 {
-            top: 81%;
-            left: 58%;
-        }
-
-        .lvl-30 {
-            top: 81%;
-            left: 53%;
-        }
-
-        .lvl-31 {
-            top: 81%;
-            left: 48%;
-        }
-
-        .lvl-32 {
-            top: 81%;
-            left: 43%;
-        }
-
-        .lvl-33 {
-            top: 81%;
-            left: 38%;
-        }
-
-        .lvl-34 {
-            top: 81%;
-            left: 33%;
-        }
-
-        .lvl-35 {
-            top: 78%;
-            left: 28%;
-        }
-
-        .lvl-36 {
-            top: 70%;
-            left: 25%;
-        }
-
-        .lvl-37 {
-            top: 60%;
-            left: 25%;
-        }
-
-        .lvl-38 {
-            top: 53%;
-            left: 30%;
-        }
-
-        .lvl-39 {
-            top: 52%;
-            left: 37%;
-        }
-
-        .lvl-40 {
-            top: 52%;
-            left: 43%;
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
         .puzzle-overlay {
@@ -410,6 +367,37 @@ $conn = new mysqli("localhost", "root", "", "banana_game");
 
         #question-area img {
             width: 420px;
+            max-width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .choices-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .choice-btn {
+            padding: 12px 20px;
+            font-size: 18px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        .choice-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .choice-btn.selected {
+            background: #27ae60;
+            box-shadow: 0 0 10px rgba(39, 174, 96, 0.5);
         }
 
         input {
@@ -419,6 +407,7 @@ $conn = new mysqli("localhost", "root", "", "banana_game");
             margin-top: 15px;
             border-radius: 8px;
             border: 1px solid #ccc;
+            display: none;
         }
 
         .submit-btn {
@@ -430,6 +419,12 @@ $conn = new mysqli("localhost", "root", "", "banana_game");
             font-size: 20px;
             border-radius: 8px;
             cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #219a52;
+            transform: scale(1.05);
         }
 
         .close-btn {
@@ -443,14 +438,13 @@ $conn = new mysqli("localhost", "root", "", "banana_game");
         #monkey {
             position: absolute;
             bottom: 60px;
-            left: 120px;
+            left: 100px;
             width: 80px;
             height: auto;
             z-index: 15;
-            transition: left 0.5s linear, bottom 0.3s ease;
+            transition: left 0.05s linear, bottom 0.3s ease;
         }
 
-        /* Victory message */
         .victory-message {
             position: fixed;
             top: 50%;
@@ -469,7 +463,6 @@ $conn = new mysqli("localhost", "root", "", "banana_game");
             animation: bounce 0.5s ease;
         }
 
-        /* Death message */
         .death-message {
             position: fixed;
             top: 50%;
@@ -479,47 +472,64 @@ $conn = new mysqli("localhost", "root", "", "banana_game");
             color: white;
             padding: 30px 50px;
             border-radius: 20px;
-            font-size: 32px;
+            font-size: 28px;
             font-weight: bold;
             text-align: center;
             z-index: 200;
             display: none;
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
             animation: shake 0.5s ease;
+            min-width: 400px;
+        }
+
+        .death-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .death-btn {
+            padding: 12px 24px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .restart-btn {
+            background: #27ae60;
+            color: white;
+        }
+
+        .restart-btn:hover {
+            background: #219a52;
+            transform: scale(1.05);
+        }
+
+        .menu-death-btn {
+            background: #34db45;
+            color: white;
+        }
+
+        .menu-death-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
         }
 
         @keyframes bounce {
-
-            0%,
-            100% {
-                transform: translate(-50%, -50%) scale(1);
-            }
-
-            50% {
-                transform: translate(-50%, -50%) scale(1.1);
-            }
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
         }
 
         @keyframes shake {
-
-            0%,
-            100% {
-                transform: translate(-50%, -50%) translateX(0);
-            }
-
-            25% {
-                transform: translate(-50%, -50%) translateX(-10px);
-            }
-
-            75% {
-                transform: translate(-50%, -50%) translateX(10px);
-            }
-        }
-
-        /* Disabled state for game */
-        .game-disabled {
-            pointer-events: none;
-            opacity: 0.7;
+            0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+            25% { transform: translate(-50%, -50%) translateX(-10px); }
+            75% { transform: translate(-50%, -50%) translateX(10px); }
         }
 
         .reset-btn {
@@ -541,668 +551,1049 @@ $conn = new mysqli("localhost", "root", "", "banana_game");
         .reset-btn:hover {
             background: #2980b9;
         }
+
+        .controls-hint {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-family: monospace;
+            border: 1px solid gold;
+        }
+
+        .controls-hint span {
+            color: gold;
+            font-weight: bold;
+        }
+
+        .answer-mode-toggle {
+            margin-bottom: 15px;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            margin: 0 5px;
+            background: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .mode-btn.active {
+            background: #27ae60;
+        }
+        
+        .saving-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: #27ae60;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 1000;
+            display: none;
+            font-family: monospace;
+            border: 1px solid #27ae60;
+        }
+
+        /* Fixed notification message styles - no black box */
+        .notification-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 1000;
+            animation: slideInOut 2s ease forwards;
+            pointer-events: none;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+        .header-btn {
+    width: 140px;        
+    height: 45px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 25px;
+    border: 2px solid #f1c40f;
+    background: linear-gradient(135deg, #333, #222);
+    color: white;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+        @keyframes slideInOut {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            15% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            85% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+                visibility: hidden;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <img id="monkey" src="Idle__000.png">
     <div class="game-container" id="gameContainer">
+        <div class="game-background" id="gameBackground"></div>
+        
+        <img id="monkey" src="assests/Idle__000.png">
+        
+        <div id="user-info" style="display:flex; align-items:center; gap:5px; font-family: 'Bungee', sans-serif; font-weight: 400; font-style: normal;font-size: 25px;">
+            <img src="assests/user.png" alt="User Icon" style="width:100px; height:150px; display:block; margin:0; padding:0;"> 
+            <span>Player: <strong><?php echo htmlspecialchars($current_user); ?></strong></span>
+        </div>
 
-        <video autoplay loop muted>
-            <source src="assests/backgroundmap.mp4" type="video/mp4">
-        </video>
+        <div id="score-display">
+            🍌 Bananas: <span id="banana-count"><?php echo $current_bananas; ?></span>
+        </div>
 
-        <div id="user-info">
+        <div id="current-level-display">
+            📍 Current Level: <span id="current-level"><?php echo $current_bananas + 1; ?></span>
+        </div>
 
-            👤 Player: <strong><?php echo htmlspecialchars($current_user); ?></strong>
+        <div id="hearts-display">
+            <span style="color: gold; margin-right: 10px;">❤️ LIVES:</span>
+            <span id="heart1" class="heart">❤️</span>
+            <span id="heart2" class="heart">❤️</span>
+            <span id="heart3" class="heart">❤️</span>
+        </div>
 
-            <div id="score-display">
-                🍌 Bananas:
-                <span id="banana-count"><?php echo $current_bananas; ?></span>
-            </div>
+        <a href="index.php" style="position:relative; display:inline-block; width:160px;">
+            <img src="assests/button.png" alt="Menu" style="width:100%; height:auto; display:block;">
+            <span style="position:absolute; top:150px; left:150px; transform:translate(-50%, -50%); color:white; font-weight:bold; font-size:30px; pointer-events:none;">
+                Menu
+            </span>
+        </a>
 
-            <div id="level-progress" style="margin-top: 10px; font-size: 14px;">
-                📍 Current Level: <span id="current-level-display">1</span>
-            </div>
+        <div class="levels-container" id="levelsContainer">
+            <?php
+            // Generate level buttons 1-50 with fixed positions relative to world
+            for ($i = 1; $i <= 50; $i++) {
+                $status = '';
+                if ($i < $current_bananas + 1) {
+                    $status = 'completed';
+                } elseif ($i == $current_bananas + 1) {
+                    $status = 'current';
+                } else {
+                    $status = 'locked';
+                }
+                echo "<button class='level-btn lvl-$i $status' data-level='$i' data-world-x='" . ($i * 200) . "' style='left: " . ($i * 200) . "px; top: 70%;' onclick='handleLevelClick($i)'>$i</button>";
+            }
+            ?>
+        </div>
 
-            <?php if ($is_logged_in): ?>
-                <a href="logout.php" class="logout-btn">Logout</a>
-            <?php endif; ?>
+        <div class="controls-hint">
+            🎮 <span>→</span> Move Right | <span>↑</span> Jump
+
 
         </div>
 
-        <a href="index.php" class="menu-btn">⬅ Return to Menu</a>
-
-        <?php
-        // Generate level buttons
-        for ($i = 1; $i <= 40; $i++) {
-            $unlocked_class = ($i <= $current_bananas + 1) ? 'unlocked' : '';
-            $completed_class = ($i < $current_bananas + 1) ? 'completed' : '';
-            echo "<button class='level-btn lvl-$i $unlocked_class $completed_class' onclick='handleLevelClick($i)'>$i</button>";
-        }
-        ?>
-
         <div id="puzzleBox" class="puzzle-overlay">
-
             <span class="close-btn" onclick="closePuzzle()">×</span>
-
             <h2 id="level-title"></h2>
-
             <div id="timer"></div>
-
             <div id="question-area"></div>
-
+            
+            <div class="answer-mode-toggle">
+                <button class="mode-btn" id="multipleChoiceMode" onclick="setAnswerMode('multiple')">Multiple Choice</button>
+            </div>
+            
+            <div class="choices-container" id="choicesContainer"></div>
             <input type="number" id="user-answer" placeholder="Enter your answer">
-
-            <button class="submit-btn" onclick="checkAnswer()">Submit</button>
-
+            <button class="submit-btn" onclick="checkAnswer()">Submit Answer</button>
         </div>
 
         <div id="victoryMessage" class="victory-message"></div>
-        <div id="deathMessage" class="death-message"></div>
+        <div id="deathMessage" class="death-message">
+            💀 GAME OVER! 💀<br>You lost all your hearts!<br>
+            <div class="death-buttons">
+                <button class="header-btn" onclick="resetGame()">Play Again</button>
+                <a href="index.php" class="header-btn"> Menu</a>
+            </div>
+        </div>
         <button id="resetBtn" class="reset-btn" onclick="resetGame()">🔄 Start Over</button>
-
+        <div id="savingIndicator" class="saving-indicator">💾 Saving...</div>
     </div>
 
     <script>
-        // ============================================
-        // GAME STATE VARIABLES
-        // ============================================
-        const isLoggedIn = <?php echo $is_logged_in ? 'true' : 'false'; ?>;
-        let bananaScore = <?php echo $current_bananas; ?>; // Current bananas count
-        let correctAnswer = null; // Stores the correct answer for current puzzle
-        let activeLevel = 1; // Currently active level being played
-        let timer; // Timer interval reference
-        let timeLeft; // Time remaining for current level
-        let isDead = false; // Whether monkey is dead
-        let isGameActive = true; // Whether game is active
+    // ============================================
+    // GAME STATE VARIABLES
+    // ============================================
+    const isLoggedIn = <?php echo $is_logged_in ? 'true' : 'false'; ?>;
+    let bananaScore = <?php echo $current_bananas; ?>;
+    let correctAnswer = null;
+    let activeLevel = 1;
+    let timer;
+    let timeLeft;
+    let isDead = false;
+    let isGameActive = true;
+    let isPuzzleOpen = false;
+    let puzzleTriggeredForLevel = false;
+    let currentAnswerMode = 'multiple';
+    let currentChoices = [];
+    let selectedChoice = null;
 
-        // Animation state variables
-        let isMoving = false; // Whether monkey is currently walking
-        let isJumping = false; // Whether monkey is currently jumping
-        let currentTargetLevel = null; // Level that monkey is moving to
-        let nextLevelToUnlock = bananaScore + 1; // Next level to unlock
+    // Heart system variables
+    let currentHearts = 3;
+    let wrongAnswersForCurrentLevel = 0;
 
-        // ============================================
-        // ANIMATION FRAMES
-        // ============================================
+    // Animation state variables
+    let isMoving = false;
+    let isJumping = false;
+    
+    // Keyboard control variables
+    let isMovingRight = false;
+    let moveInterval = null;
+    let jumpCooldown = false;
+    
+    // World scroll position
+    let worldScrollX = 0;
+    let cameraX = 0;
+    
+    // Character position in world coordinates
+    let characterWorldX = 100;
+    
+    // Constants
+    const imageWidth = 1920;
+    const levelSpacing = 200;
 
-        // Walking animation frames (0-7)
-        let walkFrames = [
-            "Walk__000.png",
-            "Walk__001.png",
-            "Walk__002.png",
-            "Walk__003.png",
-            "Walk__004.png",
-            "Walk__005.png",
-            "Walk__006.png",
-            "Walk__007.png"
-        ];
+    // ============================================
+    // NOTIFICATION FUNCTIONS (Fixed - No black box)
+    // ============================================
+    
+    function showNotification(message, color, bgColor = 'rgba(0,0,0,0.9)') {
+        // Remove any existing notifications
+        const existingNotifications = document.querySelectorAll('.notification-message');
+        existingNotifications.forEach(notif => notif.remove());
+        
+        const notificationDiv = document.createElement('div');
+        notificationDiv.className = 'notification-message';
+        notificationDiv.textContent = message;
+        notificationDiv.style.backgroundColor = bgColor;
+        notificationDiv.style.color = color;
+        notificationDiv.style.border = `2px solid ${color}`;
+        document.body.appendChild(notificationDiv);
+        
+        setTimeout(() => {
+            if (notificationDiv && notificationDiv.remove) {
+                notificationDiv.remove();
+            }
+        }, 2000);
+    }
 
-        // Jump animation frames (0-7)
-        let jumpFrames = [
-            "Jump__000.png",
-            "Jump__001.png",
-            "Jump__002.png",
-            "Jump__003.png",
-            "Jump__004.png",
-            "Jump__005.png",
-            "Jump__006.png",
-            "Jump__007.png"
-        ];
+    function showSuccessMessage(message) {
+        showNotification(message, '#27ae60', 'rgba(0,0,0,0.85)');
+    }
 
-        // Idle animation frames (0-9)
-        let idleFrames = [
-            "Idle__000.png",
-            "Idle__001.png",
-            "Idle__002.png",
-            "Idle__003.png",
-            "Idle__004.png",
-            "Idle__005.png",
-            "Idle__006.png",
-            "Idle__007.png",
-            "Idle__008.png",
-            "Idle__009.png"
-        ];
+    function showErrorMessage(message) {
+        showNotification(message, '#e74c3c', 'rgba(0,0,0,0.85)');
+    }
 
-        // Death animation frames (0-9)
-        let deathFrames = [
-            "Dead__000.png",
-            "Dead__001.png",
-            "Dead__002.png",
-            "Dead__003.png",
-            "Dead__004.png",
-            "Dead__005.png",
-            "Dead__006.png",
-            "Dead__007.png",
-            "Dead__008.png",
-            "Dead__009.png"
-        ];
+    function showHeartMessage(message) {
+        showNotification(message, '#ff6b35', 'rgba(0,0,0,0.85)');
+    }
 
-        // Animation indices
-        let idleIndex = 0;
-        let walkIndex = 0;
-        let jumpIndex = 0;
-        let deathIndex = 0;
-
-        // Animation interval references
-        let idleInterval;
-        let walkInterval;
-        let jumpInterval;
-        let deathInterval;
-
-        // ============================================
-        // ANIMATION CONTROL FUNCTIONS
-        // ============================================
-
-        /**
-         * Start idle animation (monkey standing still)
-         * Cycles through Idle__000.png to Idle__009.png
-         */
-        function startIdleAnimation() {
-            if (isDead) return;
-            stopAllAnimations();
-            idleInterval = setInterval(() => {
-                if (!isMoving && !isJumping && !isDead && isGameActive) {
-                    const monkey = document.getElementById("monkey");
-                    monkey.src = idleFrames[idleIndex];
-                    idleIndex = (idleIndex + 1) % idleFrames.length;
-                }
-            }, 120);
-        }
-
-        /**
-         * Start walking animation
-         * Cycles through Walk__000.png to Walk__007.png
-         */
-        function startWalkAnimation() {
-            if (isDead) return;
-            stopAllAnimations();
-            walkInterval = setInterval(() => {
-                if (isMoving && !isJumping && !isDead && isGameActive) {
-                    const monkey = document.getElementById("monkey");
-                    monkey.src = walkFrames[walkIndex];
-                    walkIndex = (walkIndex + 1) % walkFrames.length;
-                }
-            }, 100);
-        }
-
-        /**
-         * Start jumping animation
-         * Cycles through Jump__000.png to Jump__007.png
-         */
-        function startJumpAnimation() {
-            if (isDead) return;
-            stopAllAnimations();
-            jumpInterval = setInterval(() => {
-                if (isJumping && !isDead && isGameActive) {
-                    const monkey = document.getElementById("monkey");
-                    monkey.src = jumpFrames[jumpIndex];
-                    jumpIndex = (jumpIndex + 1) % jumpFrames.length;
-
-                    // Reset to idle after jump animation completes
-                    if (jumpIndex === 0) {
-                        setTimeout(() => {
-                            isJumping = false;
-                            startIdleAnimation();
-                        }, 50);
-                    }
-                }
-            }, 80);
-        }
-
-        /**
-         * Start death animation when timer ends
-         * Cycles through Dead__000.png to Dead__009.png
-         */
-        function startDeathAnimation() {
-            isDead = true;
-            isGameActive = false;
-            stopAllAnimations();
-
-            const monkey = document.getElementById("monkey");
-            deathIndex = 0;
-
-            deathInterval = setInterval(() => {
-                if (deathIndex < deathFrames.length) {
-                    monkey.src = deathFrames[deathIndex];
-                    deathIndex++;
+    // ============================================
+    // HEART SYSTEM FUNCTIONS
+    // ============================================
+    
+    function updateHeartsDisplay() {
+        for (let i = 1; i <= 3; i++) {
+            const heart = document.getElementById(`heart${i}`);
+            if (heart) {
+                if (i <= currentHearts) {
+                    heart.style.opacity = "1";
+                    heart.style.filter = "none";
                 } else {
-                    // Death animation completed
-                    clearInterval(deathInterval);
-                    showDeathMessage();
+                    heart.style.opacity = "0.3";
+                    heart.style.filter = "grayscale(100%)";
                 }
-            }, 100);
+            }
         }
+    }
 
-        /**
-         * Show death message and reset option
-         */
-        function showDeathMessage() {
-            const deathDiv = document.getElementById("deathMessage");
-            deathDiv.innerHTML = "💀 GAME OVER! 💀<br>Time's up! You died!<br>🍌 Bananas lost: " + bananaScore;
-            deathDiv.style.display = "block";
-
-            // Show reset button
-            document.getElementById("resetBtn").style.display = "block";
-
-            // Disable level buttons
-            const levelBtns = document.querySelectorAll('.level-btn');
-            levelBtns.forEach(btn => {
-                btn.style.pointerEvents = 'none';
-            });
-
+    function loseHeart() {
+    if (currentHearts > 0) {
+        currentHearts--;
+        
+        // Animate the lost heart
+        const heartToLose = document.getElementById(`heart${currentHearts + 1}`);
+        if (heartToLose) {
+            heartToLose.classList.add('heart-loss');
             setTimeout(() => {
-                deathDiv.style.display = "none";
-            }, 3000);
+                heartToLose.classList.remove('heart-loss');
+            }, 500);
         }
-
-        /**
-         * Stop all running animations
-         */
-        function stopAllAnimations() {
-            if (idleInterval) clearInterval(idleInterval);
-            if (walkInterval) clearInterval(walkInterval);
-            if (jumpInterval) clearInterval(jumpInterval);
-            if (deathInterval) clearInterval(deathInterval);
+        
+        updateHeartsDisplay();
+        
+        // Show heart loss message
+        showHeartMessage(`💔 You lost a heart! ${currentHearts} lives remaining! 💔`);
+        
+        // If no hearts left, trigger DEATH SEQUENCE (not immediate reset)
+        if (currentHearts === 0) {
+            startDeathAnimation();  // Call death animation instead of direct reset
+            return true;
         }
+        return false;
+    }
+    return true;
+}
 
-        /**
-         * Reset the game
-         */
-        function resetGame() {
-            // Reset game state
-            bananaScore = 0;
-            isDead = false;
-            isGameActive = true;
-            activeLevel = 1;
 
-            // Update UI
-            document.getElementById("banana-count").innerText = "0";
-            document.getElementById("current-level-display").innerText = "1";
+    function resetHearts() {
+        currentHearts = 3;
+        wrongAnswersForCurrentLevel = 0;
+        updateHeartsDisplay();
+    }
 
-            // Save reset score to database
-            saveScoreToDB(0);
-
-            // Reset monkey position
-            const monkey = document.getElementById("monkey");
-            monkey.style.left = "120px";
-            monkey.style.bottom = "60px";
-
-            // Update level buttons
-            updateLevelButtons();
-
-            // Hide reset button
-            document.getElementById("resetBtn").style.display = "none";
-
-            // Enable level buttons
-            const levelBtns = document.querySelectorAll('.level-btn');
-            levelBtns.forEach(btn => {
-                btn.style.pointerEvents = 'auto';
-            });
-
-            // Start idle animation
-            startIdleAnimation();
-
-            alert("Game has been reset! Start from Level 1! 🍌");
+    // ============================================
+    // SAVE SCORE FUNCTION
+    // ============================================
+    
+    function showSavingIndicator(message) {
+        const indicator = document.getElementById('savingIndicator');
+        indicator.textContent = message;
+        indicator.style.display = 'block';
+        setTimeout(() => {
+            indicator.style.display = 'none';
+        }, 2000);
+    }
+    
+    function saveScoreToDB(score) {
+        if (!isLoggedIn) {
+            console.log("User not logged in, skipping save");
+            return;
         }
-
-        // ============================================
-        // MONKEY MOVEMENT FUNCTIONS
-        // ============================================
-
-        /**
-         * Get button position for monkey to move next to
-         * @param {HTMLElement} button - The level button
-         * @returns {Object} Position coordinates
-         */
-        function getPositionNextToButton(button) {
-            const btnRect = button.getBoundingClientRect();
-            // Position monkey to the left side of the button
-            return {
-                left: btnRect.left - 70, // 70px to the left of button
-                top: btnRect.top + (btnRect.height / 2) - 40 // Center vertically with button
-            };
-        }
-
-        /**
-         * Move monkey to a specific level button position (next to it)
-         * @param {number} level - Level number to move to
-         * @param {boolean} openPuzzleAfterMove - Whether to open puzzle after movement
-         */
-        function moveMonkeyToLevel(level, openPuzzleAfterMove = true) {
-            if (isDead) return;
-
-            const levelBtn = document.querySelector(`.lvl-${level}`);
-            if (!levelBtn) return;
-
-            const targetPos = getPositionNextToButton(levelBtn);
-            const monkey = document.getElementById("monkey");
-
-            // Calculate target position
-            const targetLeft = targetPos.left;
-            const currentLeft = parseFloat(monkey.style.left) || 120;
-
-            // Don't move if already at target position
-            if (Math.abs(currentLeft - targetLeft) < 10) {
-                performJump(openPuzzleAfterMove);
-                return;
+        
+        console.log("Saving score to database:", score);
+        showSavingIndicator("💾 Saving score: " + score);
+        
+        fetch("save_score.php", {
+            method: "POST",
+            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+            body: "score=" + score
+        })
+        .then(response => response.text())
+        .then(data => {
+            console.log("Server response:", data);
+            if (data.includes("success") || data.includes("updated") || data.includes("inserted")) {
+                showSavingIndicator("✅ Score saved: " + score);
+            } else {
+                showSavingIndicator("⚠️ " + data.substring(0, 50));
             }
+        })
+        .catch(error => {
+            console.error("Error saving score:", error);
+            showSavingIndicator("❌ Failed to save!");
+        });
+    }
 
-            // Start walking animation
-            isMoving = true;
-            startWalkAnimation();
+    // ============================================
+    // ANIMATION FRAMES
+    // ============================================
+    let walkFrames = [
+        "assests/Run__000.png", "assests/Run__001.png", "assests/Run__002.png",
+        "assests/Run__003.png", "assests/Run__004.png", "assests/Run__005.png",
+        "assests/Run__006.png", "assests/Run__007.png"
+    ];
 
-            // Move smoothly to target position
-            const step = 5;
-            const moveInterval = setInterval(() => {
-                const currentPos = parseFloat(monkey.style.left) || 120;
-                const diff = targetLeft - currentPos;
+    let jumpFrames = [
+        "assests/Jump__000.png", "assests/Jump__001.png", "assests/Jump__002.png",
+        "assests/Jump__003.png", "assests/Jump__004.png", "assests/Jump__005.png",
+        "assests/Jump__006.png", "assests/Jump__007.png"
+    ];
 
-                if (Math.abs(diff) < step) {
-                    // Reached target
-                    monkey.style.left = targetLeft + "px";
-                    clearInterval(moveInterval);
-                    isMoving = false;
-                    performJump(openPuzzleAfterMove);
+    let idleFrames = [
+        "assests/Idle__000.png", "assests/Idle__001.png", "assests/Idle__002.png",
+        "assests/Idle__003.png", "assests/Idle__004.png", "assests/Idle__005.png",
+        "assests/Idle__006.png", "assests/Idle__007.png", "assests/Idle__008.png",
+        "assests/Idle__009.png"
+    ];
+
+    let deathFrames = [
+        "assests/Dead__000.png", "assests/Dead__001.png", "assests/Dead__002.png",
+        "assests/Dead__003.png", "assests/Dead__004.png", "assests/Dead__005.png",
+        "assests/Dead__006.png", "assests/Dead__007.png", "assests/Dead__008.png",
+        "assests/Dead__009.png"
+    ];
+
+    let idleIndex = 0, walkIndex = 0, jumpIndex = 0, deathIndex = 0;
+    let idleInterval, walkInterval, jumpInterval, deathInterval;
+
+    // ============================================
+    // ANSWER MODE FUNCTIONS
+    // ============================================
+    
+    function setAnswerMode(mode) {
+        currentAnswerMode = mode;
+        
+        document.getElementById('multipleChoiceMode').classList.remove('active');
+        document.getElementById(`${mode}ChoiceMode`).classList.add('active');
+        
+        if (mode === 'multiple') {
+            document.getElementById('choicesContainer').style.display = 'grid';
+            document.getElementById('user-answer').style.display = 'none';
+        } else {
+            document.getElementById('choicesContainer').style.display = 'none';
+            document.getElementById('user-answer').style.display = 'block';
+        }
+    }
+    
+    function generateMultipleChoiceAnswers(correct) {
+        let choices = [correct];
+        
+        while (choices.length < 4) {
+            let offset = Math.floor(Math.random() * 20) - 10;
+            let distractor = correct + offset;
+            
+            if (distractor !== correct && !choices.includes(distractor) && distractor >= 0) {
+                choices.push(distractor);
+            }
+        }
+        
+        for (let i = choices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [choices[i], choices[j]] = [choices[j], choices[i]];
+        }
+        
+        return choices;
+    }
+    
+    function displayMultipleChoice() {
+        const container = document.getElementById('choicesContainer');
+        container.innerHTML = '';
+        selectedChoice = null;
+        
+        currentChoices.forEach((choice, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.textContent = choice;
+            btn.onclick = () => selectChoice(choice, btn);
+            container.appendChild(btn);
+        });
+    }
+    
+    function selectChoice(choice, btnElement) {
+        document.querySelectorAll('.choice-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        
+        btnElement.classList.add('selected');
+        selectedChoice = choice;
+    }
+
+    // ============================================
+    // WORLD SCROLLING FUNCTIONS
+    // ============================================
+
+    function updateWorldScroll(deltaX) {
+        worldScrollX += deltaX;
+        cameraX = worldScrollX;
+        
+        const background = document.getElementById("gameBackground");
+        let bgScroll = worldScrollX % imageWidth;
+        background.style.backgroundPosition = `-${bgScroll}px 0`;
+        
+        const levelBtns = document.querySelectorAll('.level-btn');
+        levelBtns.forEach(btn => {
+            const worldX = parseFloat(btn.getAttribute('data-world-x'));
+            const screenX = worldX - worldScrollX;
+            btn.style.left = screenX + "px";
+            
+            if (screenX < -200 || screenX > window.innerWidth + 200) {
+                btn.style.display = 'none';
+            } else {
+                btn.style.display = 'flex';
+            }
+        });
+    }
+
+    function resetWorldScroll() {
+        worldScrollX = 0;
+        cameraX = 0;
+        updateWorldScroll(0);
+    }
+
+    // ============================================
+    // LEVEL BUTTON MANAGEMENT
+    // ============================================
+
+    function updateLevelButtons() {
+        for (let i = 1; i <= 50; i++) {
+            const btn = document.querySelector(`.lvl-${i}`);
+            if (btn) {
+                btn.classList.remove('completed', 'current', 'locked');
+                if (i < bananaScore + 1) {
+                    btn.classList.add('completed');
+                } else if (i === bananaScore + 1) {
+                    btn.classList.add('current');
                 } else {
-                    // Move step by step
-                    const newPos = currentPos + (diff > 0 ? step : -step);
-                    monkey.style.left = newPos + "px";
-                }
-            }, 16);
-        }
-
-        /**
-         * Perform jump animation at current position
-         * @param {boolean} openPuzzleAfterJump - Whether to open puzzle after jump
-         */
-        function performJump(openPuzzleAfterJump = true) {
-            if (isDead) return;
-
-            isJumping = true;
-            const monkey = document.getElementById("monkey");
-            const originalBottom = 60;
-
-            startJumpAnimation();
-
-            // Jump physics - move up and down smoothly
-            let jumpHeight = 0;
-            let goingUp = true;
-
-            const jumpInterval = setInterval(() => {
-                if (!isJumping || isDead) {
-                    clearInterval(jumpInterval);
-                    monkey.style.bottom = originalBottom + "px";
-                    if (!isDead) startIdleAnimation();
-                    return;
-                }
-
-                if (goingUp) {
-                    jumpHeight += 15;
-                    monkey.style.bottom = (originalBottom + jumpHeight) + "px";
-                    if (jumpHeight >= 80) {
-                        goingUp = false;
-                    }
-                } else {
-                    jumpHeight -= 15;
-                    monkey.style.bottom = (originalBottom + jumpHeight) + "px";
-                    if (jumpHeight <= 0) {
-                        clearInterval(jumpInterval);
-                        isJumping = false;
-                        monkey.style.bottom = originalBottom + "px";
-                        if (!isDead) startIdleAnimation();
-                        // Open puzzle after jump is complete
-                        if (openPuzzleAfterJump && currentTargetLevel && !isDead) {
-                            openPuzzleAfterMove(currentTargetLevel);
-                            currentTargetLevel = null;
-                        }
-                    }
-                }
-            }, 30);
-        }
-
-        // ============================================
-        // LEVEL MANAGEMENT FUNCTIONS
-        // ============================================
-
-        /**
-         * Update UI to show unlocked and completed levels
-         */
-        function updateLevelButtons() {
-            // Update button classes based on banana score
-            for (let i = 1; i <= 40; i++) {
-                const btn = document.querySelector(`.lvl-${i}`);
-                if (btn) {
-                    // Remove existing classes
-                    btn.classList.remove('unlocked', 'completed', 'current');
-
-                    // Add appropriate class
-                    if (i < bananaScore + 1) {
-                        btn.classList.add('completed');
-                    } else if (i === bananaScore + 1) {
-                        btn.classList.add('unlocked', 'current');
-                    } else if (i <= bananaScore + 1) {
-                        btn.classList.add('unlocked');
-                    }
+                    btn.classList.add('locked');
                 }
             }
-
-            // Update current level display
-            document.getElementById('current-level-display').innerText = bananaScore + 1;
         }
+        document.getElementById('current-level').innerText = bananaScore + 1;
+        puzzleTriggeredForLevel = false;
+    }
 
-        /**
-         * Handle level button click
-         * @param {number} level - Level number clicked
-         */
-        function handleLevelClick(level) {
-            // Check if game is active
-            if (isDead) {
-                alert("You are dead! Click 'Start Over' to play again!");
-                return;
-            }
-
-            // Check if user is logged in
-            if (!isLoggedIn) {
-                alert("Please login to play");
-                window.location.href = "login.php";
-                return;
-            }
-
-            // Check if level is unlocked
-            if (level > bananaScore + 1) {
-                alert("Complete Level " + (bananaScore + 1) + " first to unlock Level " + level + "! 🍌");
-                return;
-            }
-
-            // Check if level is already completed
-            if (level < bananaScore + 1) {
-                alert("You've already completed Level " + level + "! Move to the next level! 🎉");
-                return;
-            }
-
-            // Set target level and start movement
-            currentTargetLevel = level;
-            moveMonkeyToLevel(level);
+    function positionCharacterAtCurrentLevel() {
+        const currentLevel = bananaScore + 1;
+        if (currentLevel > 50) {
+            const lastLevelWorldX = 50 * 200;
+            characterWorldX = lastLevelWorldX - 100;
+            const targetScrollX = characterWorldX - 100;
+            worldScrollX = targetScrollX;
+            updateWorldScroll(0);
+            return;
         }
+        
+        const currentLevelWorldX = currentLevel * 200;
+        characterWorldX = currentLevelWorldX - 100;
+        const targetScrollX = characterWorldX - 100;
+        worldScrollX = targetScrollX;
+        updateWorldScroll(0);
+        
+        const monkey = document.getElementById("monkey");
+        monkey.style.left = "100px";
+        monkey.style.bottom = "60px";
+        
+        puzzleTriggeredForLevel = false;
+        wrongAnswersForCurrentLevel = 0;
+    }
 
-        /**
-         * Open puzzle after monkey finishes moving
-         * @param {number} level - Level to open puzzle for
-         */
-        function openPuzzleAfterMove(level) {
-            if (isDead) return;
-            activeLevel = level;
+    // ============================================
+    // PUZZLE AUTO-TRIGGER
+    // ============================================
+    
+    function checkLevelProximity() {
+        if (isPuzzleOpen || isDead || !isGameActive) return;
+        
+        const currentLevel = bananaScore + 1;
+        if (currentLevel > 50) return;
+        
+        const levelBtn = document.querySelector(`.lvl-${currentLevel}`);
+        if (!levelBtn) return;
+        
+        const btnScreenX = parseFloat(levelBtn.style.left);
+        const monkeyScreenX = parseFloat(document.getElementById("monkey").style.left);
+        const distance = Math.abs(btnScreenX - monkeyScreenX);
+        const touchThreshold = 70;
+        
+        if (distance < touchThreshold && !levelBtn.classList.contains('completed') && !puzzleTriggeredForLevel) {
+            puzzleTriggeredForLevel = true;
+            activeLevel = currentLevel;
+            
+            if (isMovingRight) {
+                stopMoving();
+            }
+            
             openPuzzle();
         }
+    }
 
-        /**
-         * Start timer for current level
-         * Timer duration depends on level difficulty
-         * @param {number} level - Current level number
-         */
-        function startTimer(level) {
-            // Set time based on level difficulty
-            if (level < 10) {
-                timeLeft = 60; // 60 seconds for levels 1-9
-            } else if (level < 20) {
-                timeLeft = 30; // 30 seconds for levels 10-19
-            } else if (level < 35) {
-                timeLeft = 20; // 20 seconds for levels 20-34
-            } else {
-                timeLeft = 10; // 10 seconds for levels 35-40
-            }
-
-            clearInterval(timer);
-
-            timer = setInterval(function() {
-                if (!isDead && isGameActive) {
-                    document.getElementById("timer").innerText = "⏱ " + timeLeft + " sec";
-                    timeLeft--;
-
-                    if (timeLeft < 0) {
-                        clearInterval(timer);
-                        // Time's up! Monkey dies
-                        closePuzzle();
-                        startDeathAnimation();
-                    }
-                }
-            }, 1000);
-        }
-
-        /**
-         * Open puzzle popup and load question
-         */
-        async function openPuzzle() {
-            if (isDead) return;
-
-            const box = document.getElementById("puzzleBox");
-            const area = document.getElementById("question-area");
-            document.getElementById("level-title").innerText = "Level " + activeLevel;
-            document.getElementById("user-answer").value = "";
-            box.style.display = "block";
-            area.innerHTML = "Loading puzzle...";
-            startTimer(activeLevel);
-
-            try {
-                // Fetch puzzle from API
-                const response = await fetch("https://marcconrad.com/uob/banana/api.php");
-                const data = await response.json();
-                correctAnswer = data.solution;
-                area.innerHTML = `<img src="${data.question}" alt="Puzzle Question">`;
-            } catch {
-                area.innerHTML = "Puzzle loading failed. Please try again!";
-            }
-        }
-
-        /**
-         * Check user's answer against correct answer
-         * If correct, award banana and move to next level
-         */
-        function checkAnswer() {
-            if (isDead) {
-                alert("You are dead! Please reset the game to continue!");
-                closePuzzle();
+    // ============================================
+    // KEYBOARD CONTROLS
+    // ============================================
+    
+    function startMovingRight() {
+        if (isDead || !isGameActive || isMovingRight || isJumping || isPuzzleOpen) return;
+        
+        isMovingRight = true;
+        isMoving = true;
+        startWalkAnimation();
+        
+        moveInterval = setInterval(() => {
+            if (isDead || !isGameActive || !isMovingRight || isPuzzleOpen) {
+                stopMoving();
                 return;
             }
+            
+            characterWorldX += 8;
+            const targetScrollX = characterWorldX - 100;
+            const scrollDiff = targetScrollX - worldScrollX;
+            
+            if (Math.abs(scrollDiff) > 1) {
+                const scrollStep = scrollDiff * 0.1;
+                updateWorldScroll(scrollStep);
+            }
+            
+            document.getElementById("monkey").style.left = "100px";
+            checkLevelProximity();
+        }, 30);
+    }
 
-            let input = document.getElementById("user-answer").value;
+    function stopMoving() {
+        if (moveInterval) {
+            clearInterval(moveInterval);
+            moveInterval = null;
+        }
+        isMovingRight = false;
+        isMoving = false;
+        if (!isJumping && !isDead && isGameActive && !isPuzzleOpen) {
+            startIdleAnimation();
+        }
+    }
 
-            if (input == correctAnswer) {
-                // Correct answer!
-                clearInterval(timer);
-                bananaScore++;
-                document.getElementById("banana-count").innerText = bananaScore;
-
-                // Check if game is completed
-                if (bananaScore === 40) {
-                    showVictoryMessage();
+    function jump() {
+        if (isDead || !isGameActive || isJumping || jumpCooldown || isPuzzleOpen) return;
+        
+        jumpCooldown = true;
+        isJumping = true;
+        
+        if (isMovingRight) {
+            stopMoving();
+        }
+        
+        const monkey = document.getElementById("monkey");
+        const originalBottom = 60;
+        let jumpHeight = 0;
+        let goingUp = true;
+        
+        startJumpAnimation();
+        
+        const jumpPhysicsInterval = setInterval(() => {
+            if (!isJumping || isDead) {
+                clearInterval(jumpPhysicsInterval);
+                monkey.style.bottom = originalBottom + "px";
+                if (!isDead && isGameActive && !isPuzzleOpen) {
+                    startIdleAnimation();
                 }
-
-                // Save score to database
-                saveScoreToDB(bananaScore);
-
-                // Update level buttons UI
-                updateLevelButtons();
-
-                alert("Correct! 🍌 +1 Banana!");
-                closePuzzle();
-
-                // Automatically move to next level
-                const nextLevel = activeLevel + 1;
-                if (nextLevel <= 40) {
-                    currentTargetLevel = nextLevel;
-                    moveMonkeyToLevel(nextLevel);
-                } else {
-                    // Game completed
-                    alert("Congratulations! You've completed all 40 levels! 🎉🎉🎉");
-                }
+                setTimeout(() => { jumpCooldown = false; }, 500);
+                return;
+            }
+            
+            if (goingUp) {
+                jumpHeight += 15;
+                monkey.style.bottom = (originalBottom + jumpHeight) + "px";
+                if (jumpHeight >= 80) goingUp = false;
             } else {
-                // Wrong answer
-                alert("Wrong answer! Try again! 🤔");
-                document.getElementById("user-answer").value = "";
+                jumpHeight -= 15;
+                monkey.style.bottom = (originalBottom + jumpHeight) + "px";
+                if (jumpHeight <= 0) {
+                    clearInterval(jumpPhysicsInterval);
+                    isJumping = false;
+                    monkey.style.bottom = originalBottom + "px";
+                    if (!isDead && isGameActive && !isPuzzleOpen) {
+                        startIdleAnimation();
+                    }
+                    setTimeout(() => { jumpCooldown = false; }, 500);
+                }
+            }
+        }, 30);
+    }
+
+    function handleKeyDown(e) {
+        if (isDead || !isGameActive) return;
+        
+        if (isPuzzleOpen) {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'Enter') {
+                e.preventDefault();
+            }
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+            return;
+        }
+        
+        switch(e.key) {
+            case 'ArrowRight':
+                e.preventDefault();
+                startMovingRight();
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                jump();
+                break;
+        }
+    }
+
+    function handleKeyUp(e) {
+        switch(e.key) {
+            case 'ArrowRight':
+                e.preventDefault();
+                stopMoving();
+                break;
+        }
+    }
+
+    // ============================================
+    // ANIMATION FUNCTIONS
+    // ============================================
+
+    function startIdleAnimation() {
+        if (isDead) return;
+        stopAllAnimations();
+        idleInterval = setInterval(() => {
+            if (!isMoving && !isJumping && !isDead && isGameActive && !isPuzzleOpen) {
+                document.getElementById("monkey").src = idleFrames[idleIndex];
+                idleIndex = (idleIndex + 1) % idleFrames.length;
+            }
+        }, 120);
+    }
+
+    function startWalkAnimation() {
+        if (isDead) return;
+        stopAllAnimations();
+        walkInterval = setInterval(() => {
+            if (isMoving && !isJumping && !isDead && isGameActive && !isPuzzleOpen) {
+                document.getElementById("monkey").src = walkFrames[walkIndex];
+                walkIndex = (walkIndex + 1) % walkFrames.length;
+            }
+        }, 100);
+    }
+
+    function startJumpAnimation() {
+        if (isDead) return;
+        stopAllAnimations();
+        jumpInterval = setInterval(() => {
+            if (isJumping && !isDead && isGameActive) {
+                document.getElementById("monkey").src = jumpFrames[jumpIndex];
+                jumpIndex = (jumpIndex + 1) % jumpFrames.length;
+            }
+        }, 80);
+    }
+
+    function startDeathAnimation() {
+        isDead = true;
+        isGameActive = false;
+        stopMoving();
+        stopAllAnimations();
+
+        const monkey = document.getElementById("monkey");
+        deathIndex = 0;
+
+        deathInterval = setInterval(() => {
+            if (deathIndex < deathFrames.length) {
+                monkey.src = deathFrames[deathIndex];
+                deathIndex++;
+            } else {
+                clearInterval(deathInterval);
+                showDeathMessage();
+            }
+        }, 100);
+    }
+
+    function showDeathMessage() {
+        const deathDiv = document.getElementById("deathMessage");
+        deathDiv.style.display = "block";
+        
+        const levelBtns = document.querySelectorAll('.level-btn');
+        levelBtns.forEach(btn => btn.style.pointerEvents = 'none');
+    }
+
+    function stopAllAnimations() {
+        if (idleInterval) clearInterval(idleInterval);
+        if (walkInterval) clearInterval(walkInterval);
+        if (jumpInterval) clearInterval(jumpInterval);
+        if (deathInterval) clearInterval(deathInterval);
+    }
+
+    // ============================================
+    // PUZZLE FUNCTIONS
+    // ============================================
+
+    function startTimer(level) {
+        if (level < 10) timeLeft = 60;
+        else if (level < 20) timeLeft = 45;
+        else if (level < 35) timeLeft = 30;
+        else timeLeft = 20;
+        
+        clearInterval(timer);
+        timer = setInterval(function() {
+            if (!isDead && isGameActive) {
+                document.getElementById("timer").innerText = "⏱ " + timeLeft + " sec";
+                timeLeft--;
+                if (timeLeft < 0) {
+                    clearInterval(timer);
+                    closePuzzle();
+                    loseHeart();
+                    if (currentHearts > 0) {
+                        setTimeout(() => {
+                            if (!isDead && currentHearts > 0) {
+                                openPuzzle();
+                            }
+                        }, 1000);
+                    }
+                }
+            }
+        }, 1000);
+    }
+
+    async function openPuzzle() {
+        if (isDead || isPuzzleOpen || currentHearts === 0) return;
+        
+        isPuzzleOpen = true;
+        stopMoving();
+        
+        const box = document.getElementById("puzzleBox");
+        const area = document.getElementById("question-area");
+        document.getElementById("level-title").innerText = "Level " + activeLevel;
+        document.getElementById("user-answer").value = "";
+        box.style.display = "block";
+        area.innerHTML = "Loading puzzle...";
+        startTimer(activeLevel);
+        
+        try {
+            const response = await fetch("https://marcconrad.com/uob/banana/api.php");
+            const data = await response.json();
+            correctAnswer = data.solution;
+            area.innerHTML = `<img src="${data.question}" alt="Puzzle Question">`;
+            
+            currentChoices = generateMultipleChoiceAnswers(correctAnswer);
+            displayMultipleChoice();
+            setAnswerMode('multiple');
+            
+        } catch {
+            area.innerHTML = "Puzzle loading failed. Please try again!";
+        }
+    }
+
+    function checkAnswer() {
+        if (isDead) {
+            showErrorMessage("You are dead! Please reset the game to continue!");
+            closePuzzle();
+            return;
+        }
+        
+        let userAnswer;
+        
+        if (currentAnswerMode === 'multiple') {
+            if (selectedChoice === null) {
+                showErrorMessage("Please select an answer!");
+                return;
+            }
+            userAnswer = selectedChoice;
+        } else {
+            userAnswer = parseInt(document.getElementById("user-answer").value);
+            if (isNaN(userAnswer)) {
+                showErrorMessage("Please enter a valid number!");
+                return;
             }
         }
-
-        /**
-         * Show victory message when game is completed
-         */
-        function showVictoryMessage() {
-            const victoryDiv = document.getElementById("victoryMessage");
-            victoryDiv.innerHTML = "🎉🏆 VICTORY! 🏆🎉<br>You've completed all 40 levels!<br>🍌🍌🍌🍌🍌";
-            victoryDiv.style.display = "block";
-            setTimeout(() => {
-                victoryDiv.style.display = "none";
-            }, 5000);
-        }
-
-        /**
-         * Close puzzle popup
-         */
-        function closePuzzle() {
-            document.getElementById("puzzleBox").style.display = "none";
+        
+        if (userAnswer == correctAnswer) {
+            // Correct answer
+            wrongAnswersForCurrentLevel = 0;
             clearInterval(timer);
+            
+            bananaScore++;
+            document.getElementById("banana-count").innerText = bananaScore;
+            document.getElementById("current-level").innerText = bananaScore + 1;
+            
+            // Show success message
+            showSuccessMessage(`✅ CORRECT! 🍌 +1 Banana! 🍌 (Total: ${bananaScore}) ✅`);
+            
+            if (bananaScore === 50) {
+                showVictoryMessage();
+            }
+            
+            saveScoreToDB(bananaScore);
+            updateLevelButtons();
+            positionCharacterAtCurrentLevel();
+            
+            closePuzzle();
+            isPuzzleOpen = false;
+            startIdleAnimation();
+            
+            // Bonus heart if below max
+            if (currentHearts < 3) {
+                currentHearts++;
+                updateHeartsDisplay();
+                showHeartMessage("❤️ BONUS! You gained a heart! ❤️");
+            }
+        } else {
+            // Wrong answer
+            wrongAnswersForCurrentLevel++;
+            showErrorMessage(`❌ WRONG! The correct answer was ${correctAnswer}. ${wrongAnswersForCurrentLevel} attempt(s) used. ❌`);
+            
+            const gameOver = loseHeart();
+            clearInterval(timer);
+            closePuzzle();
+            
+            if (!gameOver && currentHearts > 0) {
+                puzzleTriggeredForLevel = false;
+                setTimeout(() => {
+                    if (!isDead && isGameActive && currentHearts > 0) {
+                        showHeartMessage(`🔄 Retrying Level ${activeLevel}... You have ${currentHearts} hearts left! 🔄`);
+                        setTimeout(() => {
+                            if (!isPuzzleOpen && !isDead && currentHearts > 0) {
+                                openPuzzle();
+                            }
+                        }, 1500);
+                    }
+                }, 1000);
+            }
         }
+    }
 
-        /**
-         * Save current score to database
-         * @param {number} score - Current banana score
-         */
-        function saveScoreToDB(score) {
-            fetch("save_score.php", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: "score=" + score
-            });
+    function showVictoryMessage() {
+        const victoryDiv = document.getElementById("victoryMessage");
+        victoryDiv.innerHTML = "🎉🏆 VICTORY! 🏆🎉<br>You've completed all 50 levels!<br>🍌🍌🍌🍌🍌";
+        victoryDiv.style.display = "block";
+        setTimeout(() => { victoryDiv.style.display = "none"; }, 5000);
+    }
+
+    function closePuzzle() {
+        document.getElementById("puzzleBox").style.display = "none";
+        clearInterval(timer);
+        isPuzzleOpen = false;
+        selectedChoice = null;
+        if (!isDead && isGameActive) {
+            startIdleAnimation();
         }
+    }
 
-        // ============================================
-        // INITIALIZATION
-        // ============================================
-
-        // Initialize idle animation
-        startIdleAnimation();
-
-        // Set initial monkey position
-        const monkey = document.getElementById("monkey");
-        monkey.style.left = "120px";
-        monkey.style.bottom = "60px";
-
-        // Update level buttons based on current score
-        updateLevelButtons();
-
-        // If user has completed some levels, move monkey to current level position
-        if (bananaScore > 0) {
+    function handleLevelClick(level) {
+        if (isDead) {
+            showErrorMessage("You are dead! Click 'Play Again' to restart!");
+            return;
+        }
+        if (!isLoggedIn) {
+            showErrorMessage("Please login to play");
             setTimeout(() => {
-                const currentLevel = bananaScore + 1;
-                moveMonkeyToLevel(currentLevel, false);
-            }, 1000);
+                window.location.href = "login.php";
+            }, 1500);
+            return;
         }
+        if (level > bananaScore + 1) {
+            showErrorMessage("Complete Level " + (bananaScore + 1) + " first to unlock Level " + level + "! 🍌");
+            return;
+        }
+        if (level < bananaScore + 1) {
+            showErrorMessage("You've already completed Level " + level + "!");
+            return;
+        }
+        
+        activeLevel = level;
+        openPuzzle();
+    }
+
+    function resetGame() {
+        
+            isDead = false;
+            isGameActive = true;
+            isPuzzleOpen = false;
+            puzzleTriggeredForLevel = false;
+            selectedChoice = null;
+            
+            // Reset hearts
+            currentHearts = 3;
+            wrongAnswersForCurrentLevel = 0;
+            updateHeartsDisplay();
+            
+            if (timer) clearInterval(timer);
+            
+            stopMoving();
+            stopAllAnimations();
+            
+            bananaScore = 0;
+            document.getElementById("banana-count").innerText = bananaScore;
+            document.getElementById("current-level").innerText = bananaScore + 1;
+            
+            saveScoreToDB(bananaScore);
+            
+            for (let i = 1; i <= 50; i++) {
+                const btn = document.querySelector(`.lvl-${i}`);
+                if (btn) {
+                    btn.classList.remove('completed', 'current', 'locked');
+                    if (i === 1) btn.classList.add('current');
+                    else btn.classList.add('locked');
+                }
+            }
+            
+            document.getElementById("deathMessage").style.display = "none";
+            
+            const levelBtns = document.querySelectorAll('.level-btn');
+            levelBtns.forEach(btn => btn.style.pointerEvents = 'auto');
+            
+            const firstLevelWorldX = 1 * 200;
+            characterWorldX = firstLevelWorldX - 100;
+            const targetScrollX = characterWorldX - 100;
+            worldScrollX = targetScrollX;
+            updateWorldScroll(0);
+            
+            const monkey = document.getElementById("monkey");
+            monkey.src = "assests/Idle__000.png";
+            monkey.style.left = "100px";
+            monkey.style.bottom = "60px";
+            
+            activeLevel = 1;
+            closePuzzle();
+            startIdleAnimation();
+            
+            showSuccessMessage("🔄 GAME RESET! Starting from Level 1 with 3 Hearts! 🔄");
+        
+    }
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+    
+    startIdleAnimation();
+    updateHeartsDisplay();
+    
+    const monkey = document.getElementById("monkey");
+    monkey.style.left = "100px";
+    monkey.style.bottom = "60px";
+    
+    const background = document.getElementById("gameBackground");
+    background.style.backgroundSize = "auto 100%";
+    background.style.backgroundRepeat = "repeat-x";
+    background.style.backgroundPosition = "0 0";
+    background.style.backgroundColor = "#000";
+    
+    updateWorldScroll(0);
+    updateLevelButtons();
+    positionCharacterAtCurrentLevel();
+    
+    document.getElementById("banana-count").innerText = bananaScore;
+    
+    setInterval(() => {
+        if (!isPuzzleOpen && !isDead && isGameActive) {
+            checkLevelProximity();
+        }
+    }, 50);
+    
+    console.log("Game initialized. Score:", bananaScore, "Hearts:", currentHearts);
     </script>
-
 </body>
-
 </html>
+
+
+
+
+//todo 
+menu button adding in th egame map
+and the user name in the main pagge 
