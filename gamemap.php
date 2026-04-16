@@ -711,7 +711,7 @@ $conn = new mysqli("localhost", "root", "", "banana_game");
         </div>
 
         <div class="controls-hint">
-            🎮 <span>→</span> Move Right | <span>↑</span> Jump
+            <a href="index.php" class="header-btn"> Menu</a>
 
 
         </div>
@@ -1590,10 +1590,3 @@ $conn = new mysqli("localhost", "root", "", "banana_game");
     </script>
 </body>
 </html>
-
-
-
-
-//todo 
-menu button adding in th egame map
-and the user name in the main pagge 

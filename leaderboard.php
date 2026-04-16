@@ -408,4 +408,3 @@ $result = $conn->query("SELECT username, SUM(bananas) AS total_bananas
 </body>
 </html>
 
-//
